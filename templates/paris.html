@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Paris</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 24px;
+      }
+
+      .retour,
+      .api {
+        display: inline-block;
+        margin-right: 8px;
+        margin-bottom: 12px;
+        text-decoration: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+      }
+
+      .retour {
+        background: #6b7280;
+      }
+
+      .api {
+        background: #2563eb;
+      }
+
+      pre {
+        background: #f4f4f5;
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="retour" href="/">Retour à l'accueil</a>
+    <a class="api" href="/api/paris">Voir le JSON brut</a>
+
+    <h1>Paris - Températures horaires</h1>
+    <p>Cette page affiche un aperçu des données météo de Paris.</p>
+
+    <pre id="preview">Chargement...</pre>
+
+    <script>
+      async function chargerPreview() {
+        try {
+          const reponse = await fetch('/api/paris', {
+            headers: { Accept: 'application/json' }
+          });
+
+          if (!reponse.ok) {
+            throw new Error('HTTP ' + reponse.status);
+          }
+
+          const json = await reponse.json();
+          const extrait = json.slice(0, 8);
+          document.getElementById('preview').textContent = JSON.stringify(extrait, null, 2);
+        } catch (erreur) {
+          document.getElementById('preview').textContent = 'Erreur: ' + (erreur.message || erreur);
+        }
+      }
+
+      chargerPreview();
+    </script>
+  </body>
+</html>

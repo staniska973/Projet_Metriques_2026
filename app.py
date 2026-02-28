@@ -14,7 +14,12 @@ def ma_page_contact():
   return render_template('contact.html')
 
 
-@app.get('/paris')
+@app.route('/paris')
+def ma_page_paris():
+  return render_template('paris.html')
+
+
+@app.get('/api/paris')
 def api_paris():
   url = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&hourly=temperature_2m'
   response = requests.get(url, timeout=15)
