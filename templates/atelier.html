@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atelier météo</title>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 24px;
+      }
+
+      #chart {
+        width: 100%;
+        height: 520px;
+      }
+
+      #status {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Atelier : vent max à Marseille</h1>
+    <p>On utilise ici un graphique en secteurs (pie chart) pour changer du line chart et de l'histogramme.</p>
+    <div id="chart"></div>
+    <div id="status">Chargement en cours...</div>
+
+    <script>
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(init);
+
+      async function init() {
+        try {
+          const rows = await chargerDonnees();
+          dessiner(rows);
+          setStatus('OK - Données chargées depuis /atelier-marseille');
+        } catch (erreur) {
+          setStatus('Erreur: ' + (erreur.message || erreur));
+        }
+      }
+
+      async function chargerDonnees() {
+        const reponse = await fetch('/atelier-marseille', {
+          headers: { Accept: 'application/json' }
+        });
+
+        if (!reponse.ok) {
+          throw new Error('HTTP ' + reponse.status + ' sur /atelier-marseille');
+        }
+
+        const json = await reponse.json();
+
+        return json.map(point => {
+          const dateCourte = point.date.slice(5);
+          return [dateCourte, Number(point.wind_kmh)];
+        });
+      }
+
+      function dessiner(rows) {
+        const data = new google.visualization.DataTable();
+        data.addColumn('string', 'Date');
+        data.addColumn('number', 'Vent max (km/h)');
+        data.addRows(rows);
+
+        const options = {
+          title: 'Répartition de la vitesse du vent max - Marseille (7 jours)',
+          pieHole: 0.35
+        };
+
+        const chart = new google.visualization.PieChart(document.getElementById('chart'));
+        chart.draw(data, options);
+      }
+
+      function setStatus(message) {
+        document.getElementById('status').textContent = message;
+      }
+    </script>
+  </body>
+</html>
